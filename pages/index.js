@@ -1,17 +1,39 @@
 import Head from "next/head";
-import {useDispatch,useSelector} from 'react-redux'
-import { fetchAllUser } from "../redux/action";
+import { useDispatch, useSelector } from "react-redux";
+import { addUser, fetchAllUser } from "../redux/action";
 import styles from "../styles/Home.module.css";
 import { wrapper } from "../redux/store";
+import { useState } from "react";
 
-export const getServerSideProps = wrapper.getServerSideProps(async ({store}) => {
-  const dispatch = store.dispatch  
-  await dispatch(await fetchAllUser());
-});
+export const getServerSideProps = wrapper.getServerSideProps(
+  async ({ store }) => {
+    const dispatch = store.dispatch;
+    await dispatch(await fetchAllUser());
+  }
+);
 
- const Home = () => {
+const Home = () => {
+  const dispatch = useDispatch();
+  const Users = useSelector((state) => state.userReducer.users);
 
-  const Users = useSelector(state => state.userReducer.users)
+  const [name,setName] = useState("")
+
+  const addItem = (e) =>{
+    e.preventDefault();
+
+    function makeid(length) {
+      var result           = '';
+      var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      var charactersLength = characters.length;
+      for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * 
+   charactersLength));
+     }
+     return result;
+  }
+    
+    dispatch(addUser({name:makeid(8)}))
+  }
 
   return (
     <div className={styles.container}>
@@ -22,11 +44,13 @@ export const getServerSideProps = wrapper.getServerSideProps(async ({store}) => 
       </Head>
 
       <main className={styles.main}>
-{
-  Users.map(data=>(
-    <p key={data.id}>{data.name}</p>
-  ))
-}
+        {Users.map((data) => (
+          <p key={data.id}>{data.name}</p>
+        ))}
+        <form onSubmit={(e)=>addItem(e)}>
+          <input type="text" value={name} onChange={(e)=>setName(e.target.value)}/>
+          <button type="submit" >Submit</button>
+          </form>
       </main>
 
       <footer className={styles.footer}>
@@ -36,7 +60,6 @@ export const getServerSideProps = wrapper.getServerSideProps(async ({store}) => 
       </footer>
     </div>
   );
-}
+};
 
-export default Home
-
+export default Home;
